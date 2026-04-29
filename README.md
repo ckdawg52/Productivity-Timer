@@ -14,7 +14,7 @@ A visually engaging Command Line Interface (CLI) productivity timer designed to 
 
 1. **Clone the repository:**
    ```bash
-   git clone https://github.com/yourusername/Productivity-Timer.git
+   git clone https://github.com/ckdawg52/Productivity-Timer.git
    cd Productivity-Timer
     ```
 
