@@ -25,7 +25,7 @@ A visually engaging Command Line Interface (CLI) productivity timer designed to 
     pip install alive-progress terminaltexteffects
     ```
 
-# 🚀 Usage
+## 🚀 Usage
 You can run the timer in two ways:
 
 1. **Interactive Mode**
