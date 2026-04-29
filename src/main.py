@@ -4,6 +4,7 @@ import argparse
 import alive_progress
 from terminaltexteffects.effects.effect_waves import Waves
 from terminaltexteffects.effects.effect_slide import Slide
+from terminaltexteffects.effects.effect_smoke import Smoke
 
 parser = argparse.ArgumentParser()
 parser.add_argument("-d", "--duration", type=float)
@@ -19,6 +20,13 @@ def clear():
 
 def wave_animated_text(text: str) -> str:
     effect = Waves(text)
+    effect.effect_config.final_gradient_frames = 1
+    with effect.terminal_output(end_symbol = " ") as terminal:
+        for frame in effect:
+            terminal.print(frame)
+
+def smoke_animated_text(text: str) -> str:
+    effect = Smoke(text)
     effect.effect_config.final_gradient_frames = 1
     with effect.terminal_output(end_symbol = " ") as terminal:
         for frame in effect:
@@ -96,19 +104,19 @@ def timer_loop(duration, interval):
     count = 1
     focus = """
   _____ ___   ____ _   _ ____  
- |  ___/ _ \ / ___| | | / ___| 
- | |_ | | | | |   | | | \___ \ 
- |  _|| |_| | |___| |_| |___) |
- |_|   \___/ \____|\___/|____/ 
+ |  ___/ _ \ / ___| | | / ___|                                                                                                                                         
+ | |_ | | | | |   | | | \___ \                                                                                                                                          
+ |  _|| |_| | |___| |_| |___) |                                                                                                                                              
+ |_|   \___/ \____|\___/|____/                                                                                                                                                 
                                
 \n
 """
     finish = """
   _____ ___ _   _ ___ ____  _   _ _____ ____  
- |  ___|_ _| \ | |_ _/ ___|| | | | ____|  _ \ 
- | |_   | ||  \| || |\___ \| |_| |  _| | | | |
+ |  ___|_ _| \ | |_ _/ ___|| | | | ____|  _ \                                                                                                                    
+ | |_   | ||  \| || |\___ \| |_| |  _| | | | |                                                                                                                            
  |  _|  | || |\  || | ___) |  _  | |___| |_| |
- |_|   |___|_| \_|___|____/|_| |_|_____|____/ \n                                              
+ |_|   |___|_| \_|___|____/|_| |_|_____|____/ \n                                                                                                                                                                      
 """
     countdown()
     for i in range(cycles):
@@ -118,9 +126,11 @@ def timer_loop(duration, interval):
         timer(int(interval))
         clear()
         if count < cycles:
-            wave_animated_text(focus)
+            print("\a")
+            smoke_animated_text(focus)
         else:
-            wave_animated_text(finish)
+            print("\a")
+            smoke_animated_text(finish)
 
 
 
