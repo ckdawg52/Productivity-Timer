@@ -69,6 +69,10 @@ if duration is None and interval is None:
 """
     clear()
     wave_animated_text(text1 + text2)
+    slide_animated_text("""
+This CLI tool is designed to help you reclaim your focus through structured, interval-based work sessions. By combining minimalist time management with high-energy terminal animations, it turns your focus blocks into a more engaging experience.
+Whether you are deep-diving into a coding project or grinding through daily tasks, this timer keeps you on track with, interval nudges, visual progress, and a dynamic UI.
+Just set your total duration, choose your intervals, and let the timer handle the rest. Stay focused, and stay productive.""")
    
 
 if duration is None:
