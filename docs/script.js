@@ -5,14 +5,13 @@ document.addEventListener('DOMContentLoaded', () => {
     const timeRemaining = document.getElementById('time-remaining');
     const animationArea = document.getElementById('animation-area');
     const bellSound = document.getElementById('bell-sound');
-    const muteSound = document.getElementById('mute-sound'); // Assuming you have this from previous updates
 
     let totalTime, intervalTime, startTime, intervalStartTime, intervalTimer, countdownTimer;
     let isTabActive = true; // Track tab visibility
 
-    bellSound.volume = 1; // Default volume
+    bellSound.volume = 0.5; // Default volume
 
-    // New: Listen for tab visibility changes to correct timer
+    // Listen for tab visibility changes to correct timer
     document.addEventListener('visibilitychange', () => {
         isTabActive = !document.hidden;
         if (isTabActive && intervalStartTime) {
@@ -69,7 +68,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }, 1000); // Check every second when active
     }
 
-    // New: Get precise elapsed time for interval and total
+    // Get precise elapsed time for interval and total
     function getElapsedInterval() {
         return performance.now() - intervalStartTime;
     }
@@ -78,7 +77,7 @@ document.addEventListener('DOMContentLoaded', () => {
         return performance.now() - startTime;
     }
 
-    // New: Correct timer if tab was inactive
+    // Correct timer if tab was inactive
     function correctTimer() {
         const elapsedInterval = getElapsedInterval();
         if (elapsedInterval >= intervalTime) {
@@ -93,11 +92,20 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function updateProgress() {
-        const remainingInterval = intervalTime - getElapsedInterval();
-        const progress = (getElapsedInterval() / intervalTime) * 100;
+        let elapsedInterval = getElapsedInterval();
+        let elapsedTotal = getElapsedTotal();
+
+        // Cap elapsed times to prevent negative remaining values
+        elapsedInterval = Math.min(elapsedInterval, intervalTime);
+        elapsedTotal = Math.min(elapsedTotal, totalTime);
+
+        const remainingInterval = intervalTime - elapsedInterval;
+        const remainingTotal = totalTime - elapsedTotal;
+
+        const progress = (elapsedInterval / intervalTime) * 100;
         progressBar.value = progress;
         timeRemaining.textContent = `Time left in interval: ${formatTime(remainingInterval / 1000)}`;
-        status.textContent = `Total time left: ${formatTime((totalTime - getElapsedTotal()) / 1000)}`;
+        status.textContent = `Total time left: ${formatTime(remainingTotal / 1000)}`;
     }
 
     function formatTime(seconds) {
@@ -117,27 +125,13 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function playSound() {
-        if (!muteSound.checked) {
-            bellSound.play().catch(error => console.error('Audio playback failed:', error));
-        }
+        bellSound.play().catch(error => console.error('Audio playback failed:', error));
     }
 
-    // New: Centralized alert trigger (sound + animation)
+    // Centralized alert trigger (sound + animation)
     function triggerAlert(text) {
         playSound();
         showAnimation(text, text === 'FOCUS!' ? 'wave-animation' : 'slide-animation');
-        // Inside triggerAlert function
-        if (Notification.permission === 'granted') {
-            new Notification('Productivity Timer Alert', {
-                body: text,
-            });
-        } else if (Notification.permission !== 'denied') {
-            Notification.requestPermission().then(permission => {
-                if (permission === 'granted') {
-                    new Notification('Productivity Timer Alert', { body: text });
-                }
-            });
-        }
-
     }
 });
+
