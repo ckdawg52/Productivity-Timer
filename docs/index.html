@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Productivity Timer - Web Version</title>
+    <link rel="stylesheet" href="styles.css">
+    <script src="script.js" defer></script> <!-- Loads JS after HTML -->
+</head>
+<body>
+    <div class="container">
+        <h1>Productivity Timer</h1>
+        <p>Set your total session time and reminder interval (in minutes). Hit Start!</p>
+        
+        <form id="timer-form">
+            <label for="total-time">Total Time (minutes):</label>
+            <input type="number" id="total-time" value="60" min="1" required>
+            
+            <label for="interval-time">Reminder Interval (minutes):</label>
+            <input type="number" id="interval-time" value="15" min="1" required>
+            
+            <button type="submit">Start Timer</button>
+        </form>
+        
+        <div id="timer-display">
+            <h2 id="status">Ready to start...</h2>
+            <progress id="progress-bar" value="0" max="100"></progress>
+            <p id="time-remaining">Time left in interval: 0:00</p>
+            <div id="animation-area"></div>
+        </div>
+        
+        <audio id="bell-sound" src="https://www.soundjay.com/button/beep-07.mp3" preload="auto"></audio> <!-- Free public domain sound; replace if needed -->
+    </div>
+</body>
+</html>
