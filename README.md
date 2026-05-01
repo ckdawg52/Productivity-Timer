@@ -1,6 +1,6 @@
 # Productivity Timer CLI 🚀
 
-A visually engaging Command Line Interface (CLI) productivity timer designed to help you stay focused using interval-based reminders. Built with Python, it features dynamic ASCII art animations and progress bars to make focus sessions less boring.
+A visually engaging Command Line Interface (CLI) productivity timer designed to help you stay focused using interval-based reminders. Built with Python, it features dynamic ASCII art animations and progress bars to make focus sessions less boring. I also made a browser version but it isn't as cool as the CLI version.
 
 ## ✨ Features
 
@@ -15,6 +15,7 @@ A visually engaging Command Line Interface (CLI) productivity timer designed to 
 1. **Clone the repository:**
    ```bash
    git clone https://github.com/ckdawg52/Productivity-Timer.git
+
    cd Productivity-Timer
     ```
 
@@ -24,6 +25,10 @@ A visually engaging Command Line Interface (CLI) productivity timer designed to 
     ```bash
     pip install alive-progress terminaltexteffects
     ```
+
+#### OR
+
+Use this [link](https://ckdawg52.github.io/Productivity-Timer/) to access the browser version (witch isn't as cool).
 
 ## 🚀 Usage
 You can run the timer in two ways:
