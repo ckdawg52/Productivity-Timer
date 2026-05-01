@@ -6,25 +6,15 @@ document.addEventListener('DOMContentLoaded', () => {
     const animationArea = document.getElementById('animation-area');
     const bellSound = document.getElementById('bell-sound');
 
-    let totalTime, intervalTime, startTime, intervalStartTime, intervalTimer, countdownTimer;
-    let isTabActive = true; // Track tab visibility
+    let worker; // Web Worker instance
+    let totalTime, intervalTime, countdownTimer;
 
     bellSound.volume = 1; // Default volume
 
-    // Listen for tab visibility changes to correct timer
-    document.addEventListener('visibilitychange', () => {
-        isTabActive = !document.hidden;
-        if (isTabActive && intervalStartTime) {
-            correctTimer(); // Adjust for any lost time when tab becomes active
-        }
-    });
-
     form.addEventListener('submit', (e) => {
         e.preventDefault();
-        totalTime = parseInt(document.getElementById('total-time').value) * 60 * 1000; // milliseconds
-        intervalTime = parseInt(document.getElementById('interval-time').value) * 60 * 1000; // milliseconds
-        startTime = performance.now(); // High-precision start time
-        intervalStartTime = startTime;
+        totalTime = parseInt(document.getElementById('total-time').value) * 60 * 1000; // ms
+        intervalTime = parseInt(document.getElementById('interval-time').value) * 60 * 1000; // ms
 
         status.textContent = 'Starting...';
         startCountdown();
@@ -42,74 +32,46 @@ document.addEventListener('DOMContentLoaded', () => {
                 clearInterval(countdownTimer);
                 animationArea.textContent = '';
                 animationArea.classList.remove('slide-animation');
-                startInterval();
+                startWorker();
             }
         }, 1000);
     }
 
-    function startInterval() {
-        updateProgress();
-        intervalTimer = setInterval(() => {
-            if (isTabActive) {
-                updateProgress();
-                if (getElapsedInterval() >= intervalTime) {
-                    clearInterval(intervalTimer);
-                    triggerAlert('FOCUS!'); // Reminder alert
+    function startWorker() {
+        if (window.Worker) {
+            worker = new Worker('timer-worker.js'); // Assumes file is in root; adjust path if needed
 
-                    if (getElapsedTotal() < totalTime) {
-                        intervalStartTime = performance.now(); // Reset for next interval
-                        setTimeout(startInterval, 2000);
-                    } else {
-                        triggerAlert('FINISHED!');
-                        status.textContent = 'Session Complete!';
-                    }
+            worker.onmessage = (event) => {
+                if (event.data.type === 'update') {
+                    updateProgress(event.data.remainingInterval, event.data.remainingTotal);
+                } else if (event.data.type === 'alert') {
+                    triggerAlert(event.data.text);
                 }
-            }
-        }, 1000); // Check every second when active
-    }
+            };
 
-    // Get precise elapsed time for interval and total
-    function getElapsedInterval() {
-        return performance.now() - intervalStartTime;
-    }
-
-    function getElapsedTotal() {
-        return performance.now() - startTime;
-    }
-
-    // Correct timer if tab was inactive
-    function correctTimer() {
-        const elapsedInterval = getElapsedInterval();
-        if (elapsedInterval >= intervalTime) {
-            triggerAlert('FOCUS!'); // Fire any missed alerts
-            intervalStartTime = performance.now() - (elapsedInterval - intervalTime); // Adjust start time
-            if (getElapsedTotal() >= totalTime) {
-                triggerAlert('FINISHED!');
-                clearInterval(intervalTimer);
-            }
+            worker.postMessage({
+                action: 'start',
+                intervalTime: intervalTime,
+                totalTime: totalTime
+            });
+        } else {
+            console.error('Web Workers not supported in this browser.');
+            // Fallback: Use original throttled timer if needed
         }
-        updateProgress();
     }
 
-    function updateProgress() {
-        let elapsedInterval = getElapsedInterval();
-        let elapsedTotal = getElapsedTotal();
+    function updateProgress(remainingInterval, remainingTotal) {
+        remainingInterval = Math.max(0, remainingInterval);
+        remainingTotal = Math.max(0, remainingTotal);
 
-        // Cap elapsed times to prevent negative remaining values
-        elapsedInterval = Math.min(elapsedInterval, intervalTime);
-        elapsedTotal = Math.min(elapsedTotal, totalTime);
-
-        const remainingInterval = intervalTime - elapsedInterval;
-        const remainingTotal = totalTime - elapsedTotal;
-
-        const progress = (elapsedInterval / intervalTime) * 100;
+        const progress = ((intervalTime - remainingInterval) / intervalTime) * 100;
         progressBar.value = progress;
         timeRemaining.textContent = `Time left in interval: ${formatTime(remainingInterval / 1000)}`;
         status.textContent = `Total time left: ${formatTime(remainingTotal / 1000)}`;
     }
 
     function formatTime(seconds) {
-        seconds = Math.max(0, Math.floor(seconds)); // Prevent negative
+        seconds = Math.max(0, Math.floor(seconds));
         const mins = Math.floor(seconds / 60);
         const secs = seconds % 60;
         return `${mins}:${secs < 10 ? '0' : ''}${secs}`;
@@ -128,10 +90,27 @@ document.addEventListener('DOMContentLoaded', () => {
         bellSound.play().catch(error => console.error('Audio playback failed:', error));
     }
 
-    // Centralized alert trigger (sound + animation)
     function triggerAlert(text) {
-        playSound();
+        playSound(); // Plays custom sound if tab is active
         showAnimation(text, text === 'FOCUS!' ? 'wave-animation' : 'slide-animation');
+        sendNotification(text); // Background-capable alert
+        if (text === 'FINISHED!') status.textContent = 'Session Complete!';
+    }
+
+    // New: Send desktop notification (works in background)
+    function sendNotification(text) {
+        if (Notification.permission === 'granted') {
+            new Notification('Productivity Timer', {
+                body: text,
+                icon: 'icon.png' // Optional: Upload an icon.png to your repo and reference it
+            });
+        } else if (Notification.permission !== 'denied') {
+            Notification.requestPermission().then(permission => {
+                if (permission === 'granted') {
+                    new Notification('Productivity Timer', { body: text });
+                }
+            });
+        }
     }
 });
 
