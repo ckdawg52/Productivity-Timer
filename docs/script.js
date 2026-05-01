@@ -10,7 +10,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let totalTime, intervalTime, startTime, intervalStartTime, intervalTimer, countdownTimer;
     let isTabActive = true; // Track tab visibility
 
-    bellSound.volume = 0.5; // Default volume
+    bellSound.volume = 1; // Default volume
 
     // New: Listen for tab visibility changes to correct timer
     document.addEventListener('visibilitychange', () => {
